@@ -1,10 +1,9 @@
 package app.web;
 
 import app.invoice.service.InvoiceService;
+import app.web.dto.CreateInvoiceRequest;
 import app.web.dto.InvoiceResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class InvoiceController {
@@ -17,10 +16,15 @@ public class InvoiceController {
 
 
     @GetMapping("/{id}")
-    public InvoiceResult getHome(@PathVariable String id) {
-
+    public InvoiceResult getInvoice(@PathVariable String id) {
 
         return invoiceService.getInvoiceByNumber(id);
     }
 
+    @PostMapping("/create")
+    public void createNewInvoice(@RequestBody CreateInvoiceRequest invoiceRequest) {
+
+        invoiceService.createNewInvoice(invoiceRequest);
+
+    }
 }
