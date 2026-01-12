@@ -3,10 +3,17 @@ package app.batch.model;
 import app.invoice.model.InvoiceItem;
 import app.product.model.Product;
 import jakarta.persistence.*;
+import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
+@Builder
 public class Batch {
 
     @Id
@@ -25,7 +32,7 @@ public class Batch {
 
     private Date expiryDate;
 
-    private int quantity;
+    private BigDecimal quantity;
 
 
 }

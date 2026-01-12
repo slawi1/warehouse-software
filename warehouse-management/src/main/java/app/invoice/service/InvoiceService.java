@@ -1,5 +1,7 @@
 package app.invoice.service;
 
+import app.batch.model.Batch;
+import app.batch.service.BatchService;
 import app.invoice.model.Invoice;
 import app.invoice.model.InvoiceItem;
 import app.invoice.repository.InvoiceItemRepository;
@@ -23,11 +25,13 @@ public class InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final InvoiceItemRepository invoiceItemRepository;
     private final ProductService productService;
+    private final BatchService batchService;
 
-    public InvoiceService(InvoiceRepository invoiceRepository, InvoiceItemRepository invoiceItemRepository, ProductService productService) {
+    public InvoiceService(InvoiceRepository invoiceRepository, InvoiceItemRepository invoiceItemRepository, ProductService productService, BatchService batchService) {
         this.invoiceRepository = invoiceRepository;
         this.invoiceItemRepository = invoiceItemRepository;
         this.productService = productService;
+        this.batchService = batchService;
     }
 
     public InvoiceResult getInvoiceByNumber(String invoiceNumber) {
@@ -95,6 +99,16 @@ public class InvoiceService {
             }
             invoiceItem.setProduct(product);
             invoiceItemRepository.save(invoiceItem);
+
+            Batch batch = Batch.builder()
+                    .quantity(item.getQuantity())
+                    .product(product)
+                    .invoiceItem(invoiceItem)
+                    .batchNumber(item.getBatchNumber())
+                    .expiryDate(item.getExpiryDate())
+                    .build();
+
+            batchService.saveBatch(batch);
         }
 
     }
