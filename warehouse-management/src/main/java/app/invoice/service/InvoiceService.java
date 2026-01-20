@@ -6,8 +6,12 @@ import app.invoice.model.Invoice;
 import app.invoice.model.InvoiceItem;
 import app.invoice.repository.InvoiceItemRepository;
 import app.invoice.repository.InvoiceRepository;
+import app.locations.model.Locations;
+import app.locations.service.LocationService;
 import app.product.model.Product;
 import app.product.service.ProductService;
+import app.stock.model.Stock;
+import app.stock.service.StockService;
 import app.web.dto.CreateInvoiceItemsRequest;
 import app.web.dto.CreateInvoiceRequest;
 import app.web.dto.InvoiceItemsResult;
@@ -26,12 +30,16 @@ public class InvoiceService {
     private final InvoiceItemRepository invoiceItemRepository;
     private final ProductService productService;
     private final BatchService batchService;
+    private final LocationService locationService;
+    private final StockService stockService;
 
-    public InvoiceService(InvoiceRepository invoiceRepository, InvoiceItemRepository invoiceItemRepository, ProductService productService, BatchService batchService) {
+    public InvoiceService(InvoiceRepository invoiceRepository, InvoiceItemRepository invoiceItemRepository, ProductService productService, BatchService batchService, LocationService locationService, StockService stockService) {
         this.invoiceRepository = invoiceRepository;
         this.invoiceItemRepository = invoiceItemRepository;
         this.productService = productService;
         this.batchService = batchService;
+        this.locationService = locationService;
+        this.stockService = stockService;
     }
 
     public InvoiceResult getInvoiceByNumber(String invoiceNumber) {
@@ -75,6 +83,8 @@ public class InvoiceService {
                 .build();
         invoiceRepository.save(invoice);
 
+        Locations inboundLocation = locationService.createInboundLocation();
+
         for (CreateInvoiceItemsRequest item : invoiceRequest.getInvoiceItems()) {
 
             InvoiceItem invoiceItem = InvoiceItem.builder()
@@ -109,6 +119,14 @@ public class InvoiceService {
                     .build();
 
             batchService.saveBatch(batch);
+
+            Stock stock = Stock.builder()
+                    .location(inboundLocation)
+                    .quantity(batch.getQuantity())
+                    .batch(batch)
+                    .prodName(batch.getProduct().getName())
+                    .build();
+            stockService.saveStock(stock);
         }
 
     }
