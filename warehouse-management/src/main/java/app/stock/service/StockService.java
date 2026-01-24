@@ -4,10 +4,14 @@ import app.locations.model.Locations;
 import app.locations.service.LocationService;
 import app.stock.model.Stock;
 import app.stock.repository.StockRepository;
+import app.web.dto.LocationItemResult;
+import app.web.dto.LocationItemsResult;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -58,5 +62,29 @@ public class StockService {
 
             }
         }
+    }
+
+    public LocationItemsResult findItemsByLocation(String locationCode) {
+
+        Optional<List<Stock>> optionalStocks = stockRepository.findStocksByLocation_Code(locationCode);
+        List<Stock> stocks = optionalStocks.get();
+
+        List<LocationItemResult> locationItems = new ArrayList<>();
+        for (Stock stock : stocks) {
+            LocationItemResult item = LocationItemResult.builder()
+                    .productName(stock.getProdName())
+                    .quantity(stock.getQuantity())
+                    .batchNumber(stock.getBatch().getBatchNumber())
+                    .expiryDate(stock.getBatch().getExpiryDate())
+                    .build();
+
+            locationItems.add(item);
+        }
+
+        return LocationItemsResult.builder()
+                .items(locationItems)
+                .code(locationCode)
+                .build();
+
     }
 }

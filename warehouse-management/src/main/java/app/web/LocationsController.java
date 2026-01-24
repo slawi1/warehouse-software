@@ -3,6 +3,7 @@ package app.web;
 import app.locations.service.LocationService;
 import app.stock.service.StockService;
 import app.web.dto.CreateLocationsRequest;
+import app.web.dto.LocationItemsResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -23,14 +24,18 @@ public class LocationsController {
     public void createNewInvoice(@RequestBody List<CreateLocationsRequest> createLocationsRequest) {
 
         locationService.createLocations(createLocationsRequest);
-
     }
 
     @PutMapping("/change-stock-location")
     public void changeStockLocation(@RequestParam Long stockId, @RequestParam BigDecimal quantity, @RequestParam String locationCode ) {
 
         stockService.changeStockLocations(stockId, quantity, locationCode);
+    }
 
+    @GetMapping("/get-items/{id}")
+    public LocationItemsResult getAllItemsOnLocation(@PathVariable String id) {
+
+        return stockService.findItemsByLocation(id);
     }
 
 

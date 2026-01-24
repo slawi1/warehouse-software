@@ -33,7 +33,7 @@ public class LocationService {
 
     public void createLocations(List<CreateLocationsRequest> createLocationsRequest) {
 
-        for(CreateLocationsRequest request : createLocationsRequest) {
+        for (CreateLocationsRequest request : createLocationsRequest) {
             Locations location = Locations.builder()
                     .code(request.getCode())
                     .build();
