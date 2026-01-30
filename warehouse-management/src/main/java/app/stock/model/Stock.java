@@ -19,7 +19,7 @@ public class Stock {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private String prodName;
+    private String productName;
 
     @ManyToOne
     @JoinColumn(name = "batch_id")

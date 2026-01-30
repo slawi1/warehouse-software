@@ -2,8 +2,11 @@ package app.stock.service;
 
 import app.locations.model.Locations;
 import app.locations.service.LocationService;
+import app.product.model.Product;
+import app.product.service.ProductService;
 import app.stock.model.Stock;
 import app.stock.repository.StockRepository;
+import app.web.dto.AllProductQuantityResult;
 import app.web.dto.LocationItemResult;
 import app.web.dto.LocationItemsResult;
 import jakarta.transaction.Transactional;
@@ -19,11 +22,13 @@ public class StockService {
 
     private final StockRepository stockRepository;
     private final LocationService locationService;
+    private final ProductService productService;
 
 
-    public StockService(StockRepository stockRepository, LocationService locationService) {
+    public StockService(StockRepository stockRepository, LocationService locationService, ProductService productService) {
         this.stockRepository = stockRepository;
         this.locationService = locationService;
+        this.productService = productService;
     }
 
     public void saveStock(Stock stock) {
@@ -34,13 +39,11 @@ public class StockService {
     public void changeStockLocations(Long stockId, BigDecimal quantity, String locationCode) {
 
         Optional<Stock> optionalStock = stockRepository.findStockById(stockId);
-
         if (optionalStock.isEmpty()) {
             throw new RuntimeException("Stock does not exists!");
         }
 
         Stock stock = optionalStock.get();
-
         if (stock.getLocation().getCode().equals(locationCode)) {
             throw new RuntimeException("New location address must be different from the current!");
         }
@@ -50,9 +53,9 @@ public class StockService {
 
         } else if (stock.getQuantity().compareTo(quantity) >= 0) {
             stock.setQuantity(stock.getQuantity().subtract(quantity));
+            stockRepository.save(stock);
         }
 
-        stockRepository.save(stock);
         Locations location = locationService.findLocationByCode(locationCode);
         Optional<Stock> optionalStockToMove = stockRepository.findStockByLocation_CodeAndBatch_BatchNumber(locationCode, stock.getBatch().getBatchNumber());
 
@@ -63,7 +66,7 @@ public class StockService {
         } else {
             Stock moovedStock = Stock.builder()
                     .batch(stock.getBatch())
-                    .prodName(stock.getProdName())
+                    .productName(stock.getProductName())
                     .quantity(quantity)
                     .build();
             moovedStock.setLocation(location);
@@ -83,12 +86,11 @@ public class StockService {
         List<LocationItemResult> locationItems = new ArrayList<>();
         for (Stock stock : stocks) {
             LocationItemResult item = LocationItemResult.builder()
-                    .productName(stock.getProdName())
+                    .productName(stock.getProductName())
                     .quantity(stock.getQuantity())
                     .batchNumber(stock.getBatch().getBatchNumber())
                     .expiryDate(stock.getBatch().getExpiryDate())
                     .build();
-
             locationItems.add(item);
         }
 
@@ -97,5 +99,31 @@ public class StockService {
                 .code(locationCode)
                 .build();
 
+    }
+
+    public AllProductQuantityResult getAllQuantityByProductName(String productName) {
+
+        Optional<Product> product = productService.findProductByName(productName);
+        if (product.isEmpty()) {
+            throw new RuntimeException("Product " + productName + " was not found.");
+        }
+
+        List<Stock> allProductStocks = stockRepository.findAllByProductName(product.get().getName());
+
+        BigDecimal allQuantity = BigDecimal.ZERO;
+
+        for (Stock stock : allProductStocks) {
+            allQuantity = allQuantity.add(stock.getQuantity());
+        }
+
+        AllProductQuantityResult result = AllProductQuantityResult.builder()
+                .productName(productName)
+                .totalQuantity(allQuantity)
+                .build();
+
+        if (allQuantity.compareTo(BigDecimal.ZERO) == 0) {
+            throw new RuntimeException("Product " + productName + " is out of quantity.");
+        }
+        return result;
     }
 }

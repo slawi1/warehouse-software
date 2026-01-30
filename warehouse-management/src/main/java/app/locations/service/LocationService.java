@@ -23,6 +23,11 @@ public class LocationService {
         return optionalLocation.orElseThrow(() -> new RuntimeException("Location does not exists"));
     }
 
+    public Locations findInboundLocation() {
+        Optional<Locations> optional = locationsRepository.findLocationsByCode("INBOUND");
+        return optional.orElse(null);
+    }
+
     public Locations createInboundLocation() {
         Locations inboundLocation = Locations.builder()
                 .code("INBOUND")

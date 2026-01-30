@@ -83,7 +83,11 @@ public class InvoiceService {
                 .build();
         invoiceRepository.save(invoice);
 
-        Locations inboundLocation = locationService.createInboundLocation();
+        Locations inbound = locationService.findInboundLocation();
+
+        if (inbound == null) {
+           inbound = locationService.createInboundLocation();
+        }
 
         for (CreateInvoiceItemsRequest item : invoiceRequest.getInvoiceItems()) {
 
@@ -121,10 +125,10 @@ public class InvoiceService {
             batchService.saveBatch(batch);
 
             Stock stock = Stock.builder()
-                    .location(inboundLocation)
+                    .location(inbound)
                     .quantity(batch.getQuantity())
                     .batch(batch)
-                    .prodName(batch.getProduct().getName())
+                    .productName(batch.getProduct().getName())
                     .build();
             stockService.saveStock(stock);
         }
