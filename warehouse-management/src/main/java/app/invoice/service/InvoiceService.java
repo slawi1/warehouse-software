@@ -2,6 +2,8 @@ package app.invoice.service;
 
 import app.batch.model.Batch;
 import app.batch.service.BatchService;
+import app.history.model.MovementHistory;
+import app.history.service.MovementHistoryService;
 import app.invoice.model.Invoice;
 import app.invoice.model.InvoiceItem;
 import app.invoice.repository.InvoiceItemRepository;
@@ -19,6 +21,7 @@ import app.web.dto.InvoiceResult;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,14 +35,16 @@ public class InvoiceService {
     private final BatchService batchService;
     private final LocationService locationService;
     private final StockService stockService;
+    private final MovementHistoryService movementHistoryService;
 
-    public InvoiceService(InvoiceRepository invoiceRepository, InvoiceItemRepository invoiceItemRepository, ProductService productService, BatchService batchService, LocationService locationService, StockService stockService) {
+    public InvoiceService(InvoiceRepository invoiceRepository, InvoiceItemRepository invoiceItemRepository, ProductService productService, BatchService batchService, LocationService locationService, StockService stockService, MovementHistoryService movementHistoryService) {
         this.invoiceRepository = invoiceRepository;
         this.invoiceItemRepository = invoiceItemRepository;
         this.productService = productService;
         this.batchService = batchService;
         this.locationService = locationService;
         this.stockService = stockService;
+        this.movementHistoryService = movementHistoryService;
     }
 
     public InvoiceResult getInvoiceByNumber(String invoiceNumber) {
@@ -131,7 +136,16 @@ public class InvoiceService {
                     .productName(batch.getProduct().getName())
                     .build();
             stockService.saveStock(stock);
-        }
 
+            MovementHistory movementHistory = MovementHistory.builder()
+                    .product(product)
+                    .batch(stock.getBatch())
+                    .fromLocation(null)
+                    .toLocation(inbound)
+                    .quantity(stock.getQuantity())
+                    .movedAt(LocalDateTime.now())
+                    .build();
+            movementHistoryService.saveMovement(movementHistory);
+        }
     }
 }

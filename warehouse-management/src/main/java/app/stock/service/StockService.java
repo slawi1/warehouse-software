@@ -1,5 +1,7 @@
 package app.stock.service;
 
+import app.history.model.MovementHistory;
+import app.history.service.MovementHistoryService;
 import app.locations.model.Locations;
 import app.locations.service.LocationService;
 import app.product.model.Product;
@@ -13,6 +15,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,12 +26,14 @@ public class StockService {
     private final StockRepository stockRepository;
     private final LocationService locationService;
     private final ProductService productService;
+    private final MovementHistoryService movementHistoryService;
 
 
-    public StockService(StockRepository stockRepository, LocationService locationService, ProductService productService) {
+    public StockService(StockRepository stockRepository, LocationService locationService, ProductService productService, MovementHistoryService movementHistoryService) {
         this.stockRepository = stockRepository;
         this.locationService = locationService;
         this.productService = productService;
+        this.movementHistoryService = movementHistoryService;
     }
 
     public void saveStock(Stock stock) {
@@ -44,7 +49,8 @@ public class StockService {
         }
 
         Stock stock = optionalStock.get();
-        if (stock.getLocation().getCode().equals(locationCode)) {
+        Locations oldLocation = stock.getLocation();
+        if (oldLocation.getCode().equals(locationCode)) {
             throw new RuntimeException("New location address must be different from the current!");
         }
 
@@ -76,6 +82,15 @@ public class StockService {
         if (stock.getQuantity().compareTo(BigDecimal.ZERO) == 0) {
             stockRepository.delete(stock);
         }
+        MovementHistory movementHistory = MovementHistory.builder()
+                .product(stock.getBatch().getProduct())
+                .batch(stock.getBatch())
+                .fromLocation(oldLocation)
+                .toLocation(location)
+                .quantity(quantity)
+                .movedAt(LocalDateTime.now())
+                .build();
+        movementHistoryService.saveMovement(movementHistory);
     }
 
     public LocationItemsResult findItemsByLocation(String locationCode) {
