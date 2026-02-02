@@ -16,15 +16,14 @@ public class StockController {
         this.stockService = stockService;
     }
 
-    @GetMapping("/get-items/{id}")
-    public LocationItemsResult getAllItemsOnLocation(@PathVariable String id) {
-        return stockService.findItemsByLocation(id);
+    @GetMapping("/get-items/{code}")
+    public LocationItemsResult getAllItemsOnLocation(@PathVariable String code) {
+        return stockService.findItemsByLocation(code);
     }
 
 
     @GetMapping("/get-item-quantity")
     public AllProductQuantityResult getAllProductQuantity(@Valid @RequestBody ProductNameRequest request) {
-        String productName = request.getProductName();
-        return stockService.getAllQuantityByProductName(productName);
+        return stockService.getAllQuantityByProductName(request.getProductName());
     }
 }

@@ -2,6 +2,7 @@ package app.web;
 
 import app.locations.service.LocationService;
 import app.stock.service.StockService;
+import app.web.dto.ChangeStockLocationRequest;
 import app.web.dto.CreateLocationsRequest;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,16 +22,12 @@ public class LocationsController {
 
     @PostMapping("/create-locations")
     public void createNewInvoice(@RequestBody List<CreateLocationsRequest> createLocationsRequest) {
-
         locationService.createLocations(createLocationsRequest);
     }
 
     @PutMapping("/change-stock-location")
-    public void changeStockLocation(@RequestParam Long stockId,
-                                    @RequestParam BigDecimal quantity,
-                                    @RequestParam String locationCode) {
-
-        stockService.changeStockLocations(stockId, quantity, locationCode);
+    public void changeStockLocation(@RequestBody ChangeStockLocationRequest request) {
+        stockService.changeStockLocations(request.getStockId(), request.getQuantity(), request.getLocationCode());
     }
 
 }
