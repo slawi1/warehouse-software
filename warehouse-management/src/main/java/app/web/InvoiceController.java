@@ -3,6 +3,7 @@ package app.web;
 import app.invoice.service.InvoiceService;
 import app.web.dto.CreateInvoiceRequest;
 import app.web.dto.InvoiceResult;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,7 +23,7 @@ public class InvoiceController {
     }
 
     @PostMapping("/create")
-    public void createNewInvoice(@RequestBody CreateInvoiceRequest invoiceRequest) {
+    public void createNewInvoice(@Valid @RequestBody CreateInvoiceRequest invoiceRequest) {
 
         invoiceService.createNewInvoice(invoiceRequest);
 

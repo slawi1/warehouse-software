@@ -8,6 +8,6 @@ import lombok.Setter;
 @Setter
 public class ProductNameRequest {
 
-    @NotBlank
+    @NotBlank(message = "Item name can not be blank!")
     private String productName;
 }

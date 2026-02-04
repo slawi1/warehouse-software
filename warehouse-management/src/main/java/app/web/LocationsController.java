@@ -4,6 +4,7 @@ import app.locations.service.LocationService;
 import app.stock.service.StockService;
 import app.web.dto.ChangeStockLocationRequest;
 import app.web.dto.CreateLocationsRequest;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -21,12 +22,12 @@ public class LocationsController {
     }
 
     @PostMapping("/create-locations")
-    public void createNewInvoice(@RequestBody List<CreateLocationsRequest> createLocationsRequest) {
+    public void createNewInvoice(@Valid @RequestBody List<CreateLocationsRequest> createLocationsRequest) {
         locationService.createLocations(createLocationsRequest);
     }
 
     @PutMapping("/change-stock-location")
-    public void changeStockLocation(@RequestBody ChangeStockLocationRequest request) {
+    public void changeStockLocation(@Valid @RequestBody ChangeStockLocationRequest request) {
         stockService.changeStockLocations(request.getStockId(), request.getQuantity(), request.getLocationCode());
     }
 
