@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api")
 public class LocationsController {
 
     private final LocationService locationService;

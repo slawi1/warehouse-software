@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api/create")
 public class InvoiceController {
 
     private final InvoiceService invoiceService;
